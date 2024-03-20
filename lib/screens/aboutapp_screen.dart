@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/main.dart';
+import 'package:flutter_application_1/screens/graphql_screen.dart';
 import 'package:flutter_application_1/screens/home_screen.dart';
+import 'package:flutter_application_1/screens/rating_screen.dart';
+import 'package:flutter_application_1/screens/restfulapi_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:flutter/material.dart';
 
 class AboutAppScreen extends StatefulWidget {
   const AboutAppScreen({Key? key}) : super(key: key);
@@ -13,77 +13,90 @@ class AboutAppScreen extends StatefulWidget {
 }
 
 class _AboutAppScreenState extends State<AboutAppScreen> {
-  double rating = 0;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('About App'),
-        centerTitle: true,
+        title: Text(
+          'About App',
+          style: TextStyle(
+            color: Colors.white, // Set text color
+          ),
+        ),
+        backgroundColor: Colors.blue, // Set AppBar background color
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'Rating: $rating',
-              style: TextStyle(fontSize: 40),
-            ),
-            const SizedBox(height: 32),
-            TextButton(
-              child: Text(
-                'Show Dialog',
-                style: TextStyle(fontSize: 32),
+              'Welcome to Our App',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                fontStyle: FontStyle.italic, // Make text italic
+                color: Colors.purple, // Set text color
               ),
-              onPressed: () => showRatingDialog(),
+            ),
+            SizedBox(height: 20),
+            // Placeholder content
+          ],
+        ),
+      ),
+      bottomNavigationBar: BottomAppBar(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            IconButton(
+              icon: Icon(Icons.star), // Star icon for rating
+              onPressed: () {
+                _showSnackbar(
+                    'App Rating'); // Show snackbar when button is pressed
+                Navigator.push(
+                  // Navigate to RatingScreen
+                  context,
+                  MaterialPageRoute(builder: (context) => RatingScreen()),
+                );
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.add), // Add icon for some action
+              onPressed: () {
+                _showSnackbar(
+                    'GraphQL'); // Show snackbar when button is pressed
+                Navigator.push(
+                  // Navigate to RatingScreen
+                  context,
+                  MaterialPageRoute(builder: (context) => GraphQlScreen()),
+                );
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.api), // API icon for RESTful API
+              onPressed: () {
+                _showSnackbar(
+                    'Restful API'); // Show snackbar when button is pressed
+                Navigator.push(
+                  // Navigate to RestfulApiScreen
+                  context,
+                  MaterialPageRoute(builder: (context) => RestFullScreen()),
+                );
+              },
             ),
           ],
         ),
+        color: Colors.blue, // Set BottomAppBar color
       ),
     );
   }
 
-  void showRatingDialog() => showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text('Rating This App'),
-          content: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Text(
-                'Please leave a star rating.',
-                style: TextStyle(fontSize: 20),
-              ),
-              const SizedBox(height: 32),
-              buildRating(),
-            ],
-          ),
-          actions: [
-            TextButton(
-              child: Text(
-                'OK',
-                style: TextStyle(fontSize: 20),
-              ),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ],
-        ),
-      );
-
-  Widget buildRating() => RatingBar.builder(
-        initialRating: rating,
-        minRating: 1,
-        itemSize: 46,
-        itemPadding: EdgeInsets.symmetric(horizontal: 4),
-        itemBuilder: (context, _) => Icon(
-          Icons.star,
-          color: Colors.amber,
-        ),
-        updateOnDrag: true,
-        onRatingUpdate: (rating) => setState(() {
-          this.rating = rating;
-        }),
-      );
+  // Function to show a snackbar
+  void _showSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
 }

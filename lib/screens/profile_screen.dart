@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/reusable_widgets/reusable_widget.dart';
 import 'package:flutter_application_1/screens/home_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -11,6 +12,28 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  String _userName = "";
+
+  @override
+  void initState() {
+    super.initState();
+    loadUserData();
+  }
+
+  void loadUserData() async {
+    try {
+      String uid = FirebaseAuth.instance.currentUser?.uid ?? "";
+      DocumentSnapshot userDoc =
+          await FirebaseFirestore.instance.collection('users').doc(uid).get();
+
+      setState(() {
+        _userName = userDoc['username'] ?? "";
+      });
+    } catch (error) {
+      print("Error loading user data: ${error.toString()}");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,7 +54,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             SizedBox(height: 10),
             ElevatedButton(
               onPressed: () {
-                // Handle the "Change Profile Photo" button press
                 _showSnackbar('Change Profile Photo');
                 // Add logic to handle uploading new profile photo from gallery
                 // You may want to use a package like image_picker for this
@@ -39,9 +61,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Text('Change Profile Photo'),
             ),
             SizedBox(height: 20),
-            Text(
-              'User Name: ${FirebaseAuth.instance.currentUser?.displayName ?? "N/A"}',
-              style: TextStyle(fontSize: 20),
+            FutureBuilder(
+              future: getUserInfo(FirebaseAuth.instance.currentUser?.uid ?? ""),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator();
+                } else if (snapshot.hasError) {
+                  return Text('Error fetching user data');
+                } else {
+                  final username = snapshot.data?['userName'] ?? 'Not found';
+                  return Text(
+                    'User Name: $username',
+                    style: TextStyle(fontSize: 20),
+                  );
+                }
+              },
             ),
             SizedBox(height: 10),
             Text(
@@ -50,7 +84,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             SizedBox(height: 10),
             Text(
-              'Password: *********', // Displaying asterisks for security
+              'Password: *********',
               style: TextStyle(fontSize: 20),
             ),
           ],
@@ -66,5 +100,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
         duration: Duration(seconds: 2),
       ),
     );
+  }
+
+  Future<Map<String, dynamic>?> getUserInfo(String userId) async {
+    try {
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .get();
+      return userDoc.data() as Map<String, dynamic>;
+    } catch (error) {
+      print("Error fetching user data: ${error.toString()}");
+      return null;
+    }
   }
 }

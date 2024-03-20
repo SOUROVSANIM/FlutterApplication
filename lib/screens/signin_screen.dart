@@ -42,17 +42,17 @@ class _SignInScreenState extends State<SignInScreen> {
             child: Column(
               children: <Widget>[
                 logoWidget("assets/logo1.jpeg"),
-                SizedBox(
+                const SizedBox(
                   height: 30,
                 ),
-                reusableTextField("Enter UserName", Icons.person_outline, false,
+                reusableTextField("Enter Email", Icons.person_outline, false,
                     _emailTextController),
-                SizedBox(
+                const SizedBox(
                   height: 20,
                 ),
                 reusableTextField("Enter Password", Icons.lock_outline, true,
                     _passwordTextController),
-                SizedBox(
+                const SizedBox(
                   height: 20,
                 ),
                 signInSignUpButton(context, true, () {
@@ -62,8 +62,10 @@ class _SignInScreenState extends State<SignInScreen> {
                           password: _passwordTextController.text)
                       .then((value) {
                     print("Created New Account");
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => HomeScreen()));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const HomeScreen()));
                   }).onError((error, stackTrace) {
                     print("Error ${error.toString()}");
                   });
@@ -106,7 +108,7 @@ class _SignInScreenState extends State<SignInScreen> {
         GestureDetector(
           onTap: () {
             Navigator.push(context,
-                MaterialPageRoute(builder: (context) => SignUpScreen()));
+                MaterialPageRoute(builder: (context) => const SignUpScreen()));
           },
           child: const Text(
             " Sign Up",

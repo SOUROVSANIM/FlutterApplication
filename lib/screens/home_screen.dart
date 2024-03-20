@@ -1,11 +1,15 @@
+import 'dart:async';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/screens/aboutapp_screen.dart';
 import 'package:flutter_application_1/screens/camera_screen.dart';
 import 'package:flutter_application_1/screens/createpost_screen.dart';
+import 'package:flutter_application_1/screens/map_screen.dart';
 import 'package:flutter_application_1/screens/people_screen.dart';
 import 'package:flutter_application_1/screens/profile_screen.dart';
 import 'package:flutter_application_1/screens/signin_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_application_1/screens/youtube_player_screen.dart.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -14,33 +18,57 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: 2),
+    );
+    _animationController.repeat(reverse: true);
+    Timer(Duration(seconds: 2), () {
+      _animationController.stop();
+    });
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Home'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.map),
-            onPressed: () {
-              // Handle the "Map" button press
-              _showSnackbar('Map');
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => CreatePostScreen()),
-              );
-              // Add navigation to the MapScreen or your map-related logic
-            },
+        title: Text(
+          'Home',
+          style: TextStyle(
+            color: Colors.white,
           ),
+        ),
+        actions: [
           IconButton(
             icon: Icon(Icons.post_add),
             onPressed: () {
               _showSnackbar('Create Post');
-              // Handle the "Create Post" button press
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => CreatePostScreen()),
+              );
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.map),
+            onPressed: () {
+              _showSnackbar('Map');
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => MapPage()),
               );
             },
           ),
@@ -48,7 +76,6 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(Icons.person),
             onPressed: () {
               _showSnackbar('Profile');
-              // Handle the "Profile" button press
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => ProfileScreen()),
@@ -58,7 +85,6 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: Icon(Icons.logout),
             onPressed: () {
-              // Sign out logic
               FirebaseAuth.instance.signOut().then((value) {
                 print("Signed Out");
                 Navigator.push(
@@ -67,19 +93,34 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               }).catchError((error) {
                 print("Error signing out: $error");
-                // Handle error if sign-out fails
               });
             },
           ),
         ],
+        backgroundColor: Colors.blue,
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              'Welcome',
-              style: TextStyle(fontSize: 24),
+            AnimatedBuilder(
+              animation: _animationController,
+              builder: (context, child) {
+                return Transform.rotate(
+                  angle: _animationController.isAnimating
+                      ? _animationController.value * 2 * pi
+                      : 0,
+                  child: Text(
+                    'Welcome to Our App',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      fontStyle: FontStyle.italic,
+                      color: Colors.purple,
+                    ),
+                  ),
+                );
+              },
             ),
             SizedBox(height: 20),
             // Placeholder content
@@ -93,8 +134,7 @@ class _HomeScreenState extends State<HomeScreen> {
             IconButton(
               icon: Icon(Icons.camera),
               onPressed: () {
-                _showSnackbar('Camera');
-                // Handle the "Camera" button press
+                _showSnackbar('Identification');
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => CameraScreen()),
@@ -102,10 +142,21 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
             IconButton(
+              icon: Icon(Icons.video_library),
+              onPressed: () {
+                _showSnackbar('Video');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => YoutubePlayerScreen(),
+                  ),
+                );
+              },
+            ),
+            IconButton(
               icon: Icon(Icons.people),
               onPressed: () {
                 _showSnackbar('People');
-                // Handle the "People" button press
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => PeopleScreen()),
@@ -115,7 +166,6 @@ class _HomeScreenState extends State<HomeScreen> {
             IconButton(
               icon: Icon(Icons.info),
               onPressed: () {
-                // Handle the "About App" button press
                 _showSnackbar('About App');
                 Navigator.push(
                   context,
@@ -125,6 +175,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
+        color: Colors.blue,
       ),
     );
   }
