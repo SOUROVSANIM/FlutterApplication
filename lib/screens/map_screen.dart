@@ -61,6 +61,8 @@ class _MapPageState extends State<MapPage> {
       }
     }
 
+    //add map location
+
     Position position = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high,
     );

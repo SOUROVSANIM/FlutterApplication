@@ -18,16 +18,6 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   String? imageUrl; // URL of the image
 
   // Function to handle photo selection
-  Future<void> _selectPhoto() async {
-    final picker = ImagePicker();
-    final pickedImage = await picker.pickImage(source: ImageSource.gallery);
-
-    if (pickedImage != null) {
-      setState(() {
-        imageUrl = pickedImage.path;
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,19 +45,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
             ),
             SizedBox(height: 20),
             // Photo selection button
-            ElevatedButton.icon(
-              onPressed: _selectPhoto,
-              icon: Icon(Icons.photo),
-              label: Text('Select Photo'),
-            ),
-            // Display selected image if available
-            if (imageUrl != null)
-              Image.file(
-                File(imageUrl!),
-                height: 200,
-                width: 200,
-                fit: BoxFit.cover,
-              ),
+
             // Add video selection widget
             // Add location selection widget
           ],

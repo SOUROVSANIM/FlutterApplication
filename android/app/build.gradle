@@ -2,7 +2,7 @@ plugins {
     id "com.android.application"
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
-   
+
 }
 
 def localProperties = new Properties()
@@ -46,18 +46,20 @@ android {
         noCompress 'lite'
     }
 
+
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.example.flutter_application_1"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
         minSdkVersion 21
-        targetSdkVersion 30
+        targetSdkVersion 28
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
-      
-
        
+
+
+
     }
 
     buildTypes {
@@ -67,18 +69,14 @@ android {
             signingConfig signingConfigs.debug
         }
     }
-
-
-   
-
-
-
-
-
 }
 
 flutter {
     source '../..'
 }
 
+dependencies {
+
+
+}
 

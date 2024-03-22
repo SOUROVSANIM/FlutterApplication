@@ -28,7 +28,7 @@ class _CameraScreenState extends State<CameraScreen> {
   classifyImage(File image) async {
     var output = await Tflite.runModelOnImage(
       path: image.path,
-      numResults: 5,
+      numResults: 1,
       threshold: 0.5,
       imageMean: 127.5,
       imageStd: 127.5,
@@ -115,6 +115,9 @@ class _CameraScreenState extends State<CameraScreen> {
               ),
             ),
             SizedBox(height: 20),
+
+            //using SASS
+
             Center(
               child: Column(
                 children: <Widget>[

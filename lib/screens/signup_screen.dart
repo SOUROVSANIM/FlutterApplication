@@ -93,6 +93,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
 
                 // Date picker
+
                 OutlinedButton(
                   onPressed: () async {
                     DateTime? selected = await showDatePicker(
@@ -141,6 +142,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
                 Text('Selected Birthday: ${_selectedDate.toString()}'),
 
+                //multiple drop box
+
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.purple,
@@ -178,6 +181,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                 ),
 
+                //user name verification
+
                 const SizedBox(height: 20),
                 signInSignUpButton(context, false, () async {
                   try {
@@ -197,6 +202,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         return;
                       }
                     }
+
+                    //email verification
 
                     UserCredential userCredential = await FirebaseAuth.instance
                         .createUserWithEmailAndPassword(

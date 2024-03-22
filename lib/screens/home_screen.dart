@@ -1,6 +1,5 @@
-import 'dart:async';
-import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application_1/screens/aboutapp_screen.dart';
 import 'package:flutter_application_1/screens/camera_screen.dart';
 import 'package:flutter_application_1/screens/createpost_screen.dart';
@@ -8,7 +7,6 @@ import 'package:flutter_application_1/screens/map_screen.dart';
 import 'package:flutter_application_1/screens/people_screen.dart';
 import 'package:flutter_application_1/screens/profile_screen.dart';
 import 'package:flutter_application_1/screens/signin_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application_1/screens/youtube_player_screen.dart.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -21,18 +19,25 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
+  late Animation<double> _animation;
 
   @override
+
+//add animation and GSAP
+
   void initState() {
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: Duration(seconds: 2),
+      duration: Duration(seconds: 5), // Duration of the animation
     );
-    _animationController.repeat(reverse: true);
-    Timer(Duration(seconds: 2), () {
-      _animationController.stop();
-    });
+
+    // Curved animation for smoother transition
+    _animation =
+        CurvedAnimation(parent: _animationController, curve: Curves.easeInOut);
+
+    // Start the animation
+    _animationController.forward();
   }
 
   @override
@@ -48,9 +53,10 @@ class _HomeScreenState extends State<HomeScreen>
         title: Text(
           'Home',
           style: TextStyle(
-            color: Colors.white,
+            color: Colors.white, // Set text color
           ),
         ),
+
         actions: [
           IconButton(
             icon: Icon(Icons.post_add),
@@ -97,30 +103,26 @@ class _HomeScreenState extends State<HomeScreen>
             },
           ),
         ],
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.blue, // Set AppBar background color
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+
+          // add GSAP & SASS
+
           children: [
-            AnimatedBuilder(
-              animation: _animationController,
-              builder: (context, child) {
-                return Transform.rotate(
-                  angle: _animationController.isAnimating
-                      ? _animationController.value * 2 * pi
-                      : 0,
-                  child: Text(
-                    'Welcome to Our App',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      fontStyle: FontStyle.italic,
-                      color: Colors.purple,
-                    ),
-                  ),
-                );
-              },
+            FadeTransition(
+              opacity: _animation,
+              child: Text(
+                'Welcome to Our App',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  fontStyle: FontStyle.italic, // Make text italic
+                  color: Colors.purple, // Set text color
+                ),
+              ),
             ),
             SizedBox(height: 20),
             // Placeholder content
@@ -134,7 +136,7 @@ class _HomeScreenState extends State<HomeScreen>
             IconButton(
               icon: Icon(Icons.camera),
               onPressed: () {
-                _showSnackbar('Identification');
+                _showSnackbar('Camera');
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => CameraScreen()),
@@ -175,7 +177,7 @@ class _HomeScreenState extends State<HomeScreen>
             ),
           ],
         ),
-        color: Colors.blue,
+        color: Colors.blue, // Set BottomAppBar color
       ),
     );
   }
