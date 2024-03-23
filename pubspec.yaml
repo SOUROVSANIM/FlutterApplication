@@ -47,7 +47,6 @@ dependencies:
   youtube_player_iframe: ^5.0.0
   image_picker: ^1.0.7
   comment_box: ^0.0.18
-  tflite: ^1.1.2
   camera: ^0.10.5+9
   image: ^4.1.7
   date_format: ^2.0.7

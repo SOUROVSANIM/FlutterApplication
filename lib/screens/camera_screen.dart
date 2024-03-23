@@ -6,7 +6,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:tflite/tflite.dart';
+// import 'package:tflite/tflite.dart';
 import 'dart:io';
 import 'package:path/path.dart';
 
@@ -18,9 +18,11 @@ class CameraScreen extends StatefulWidget {
 }
 
 class _CameraScreenState extends State<CameraScreen> {
+/*
+
   bool _loading = true;
-  File? _image;
-  List? _output;
+  late File? _image;
+  late List? _output;
   final picker = ImagePicker();
 
   @override
@@ -34,13 +36,13 @@ class _CameraScreenState extends State<CameraScreen> {
   classifyImage(File image) async {
     var output = await Tflite.runModelOnImage(
       path: image.path,
-      numResults: 1,
+      numResults: 5,
       threshold: 0.5,
       imageMean: 127.5,
       imageStd: 127.5,
     );
     setState(() {
-      _output = output;
+      _output = output!;
       _loading = false;
     });
   }
@@ -54,8 +56,8 @@ class _CameraScreenState extends State<CameraScreen> {
 
   @override
   void dispose() {
-    Tflite.close();
     super.dispose();
+    Tflite.close();
   }
 
   pickImage() async {
@@ -80,9 +82,14 @@ class _CameraScreenState extends State<CameraScreen> {
     classifyImage(_image!);
   }
 
+  */
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
+/*
+
       backgroundColor: Colors.white,
       body: Container(
         padding: EdgeInsets.symmetric(horizontal: 24),
@@ -111,7 +118,7 @@ class _CameraScreenState extends State<CameraScreen> {
                   SizedBox(height: 20),
                   if (_output != null)
                     Text(
-                      '${_output![0]['label']}',
+                      'Butterfly: ${_output![0]['label']}',
                       style: TextStyle(color: Colors.white, fontSize: 20),
                     )
                   else
@@ -168,6 +175,9 @@ class _CameraScreenState extends State<CameraScreen> {
           ],
         ),
       ),
-    );
+
+     */
+
+        );
   }
 }

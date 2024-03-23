@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/screens/graphql_screen.dart';
 import 'package:flutter_application_1/screens/home_screen.dart';
 import 'package:flutter_application_1/screens/rating_screen.dart';
-import 'package:flutter_application_1/screens/restfulapi_screen.dart';
+import 'package:flutter_application_1/screens/api_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class AboutAppScreen extends StatefulWidget {
@@ -75,11 +75,11 @@ class _AboutAppScreenState extends State<AboutAppScreen> {
               icon: Icon(Icons.api), // API icon for RESTful API
               onPressed: () {
                 _showSnackbar(
-                    'Restful API'); // Show snackbar when button is pressed
+                    'Weather'); // Show snackbar when button is pressed
                 Navigator.push(
                   // Navigate to RestfulApiScreen
                   context,
-                  MaterialPageRoute(builder: (context) => RestFullScreen()),
+                  MaterialPageRoute(builder: (context) => APIscreen()),
                 );
               },
             ),
