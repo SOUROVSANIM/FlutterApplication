@@ -83,7 +83,7 @@ class _CameraScreenState extends State<CameraScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF101010),
+      backgroundColor: Colors.white,
       body: Container(
         padding: EdgeInsets.symmetric(horizontal: 24),
         child: Column(
@@ -94,7 +94,7 @@ class _CameraScreenState extends State<CameraScreen> {
               child: Text(
                 'Detect Butterfly',
                 style: TextStyle(
-                  color: Color(0xFFE99600),
+                  color: Colors.purple,
                   fontWeight: FontWeight.w500,
                   fontSize: 28,
                 ),

@@ -65,6 +65,7 @@ dependencies:
   foundation: ^0.0.5
   provider: ^6.1.2
   shared_preferences: ^2.2.2
+  fluttertoast: ^8.2.4
   
   
   
