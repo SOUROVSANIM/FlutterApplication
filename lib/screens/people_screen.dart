@@ -148,6 +148,9 @@ class _PeopleScreenState extends State<PeopleScreen> {
 
                                       return Text('Loading likes...');
                                     })),
+
+                                //cooment part(url from comment screen)
+
                                 IconButton(
                                   icon: Icon(Icons.comment),
                                   onPressed: () {
@@ -155,7 +158,7 @@ class _PeopleScreenState extends State<PeopleScreen> {
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) =>
-                                              CommentScreen()),
+                                              CommentSection(url: postId)),
                                     );
                                   },
                                 ),

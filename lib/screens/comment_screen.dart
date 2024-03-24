@@ -3,94 +3,186 @@ import 'package:flutter_application_1/screens/people_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:comment_box/comment/comment.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
-class CommentScreen extends StatefulWidget {
-  const CommentScreen({Key? key}) : super(key: key);
+class CommentSection extends StatefulWidget {
+  final url;
+
+  const CommentSection({Key? key, required this.url}) : super(key: key);
 
   @override
-  _CommentScreenState createState() => _CommentScreenState();
+  State<CommentSection> createState() => _CommentSectionState();
 }
 
-class _CommentScreenState extends State<CommentScreen> {
+class _CommentSectionState extends State<CommentSection> {
   final formKey = GlobalKey<FormState>();
   final TextEditingController commentController = TextEditingController();
-  List filedata = [];
-
-  Widget commentChild(data) {
-    return ListView(
-      children: [
-        for (var i = 0; i < data.length; i++)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(2.0, 8.0, 2.0, 0.0),
-            child: ListTile(
-              leading: GestureDetector(
-                onTap: () async {
-                  // Display the image in large form.
-                  print("Comment Clicked");
-                },
-                child: Container(
-                  height: 50.0,
-                  width: 50.0,
-                  decoration: new BoxDecoration(
-                      color: Colors.blue,
-                      borderRadius: new BorderRadius.all(Radius.circular(50))),
-                  child: CircleAvatar(
-                      radius: 50,
-                      backgroundImage: CommentBox.commentImageParser(
-                          imageURLorPath: data[i]['pic'])),
-                ),
-              ),
-              title: Text(
-                data[i]['name'],
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              subtitle: Text(data[i]['message']),
-              trailing: Text(data[i]['date'], style: TextStyle(fontSize: 10)),
-            ),
-          )
-      ],
+  BoxDecoration myBoxDecoration() {
+    return BoxDecoration(
+      color: Colors.black,
+      border: Border.all(width: 3.0),
+      borderRadius: const BorderRadius.all(
+          Radius.circular(5.0) //                 <--- border radius here
+          ),
     );
   }
+
+  final TextEditingController _commentController = TextEditingController();
+  @override
+  void dispose() {
+    _commentController.dispose();
+    super.dispose();
+  }
+
+  Future<void> postComment(String text) async {
+    String res = "Some error occurred";
+    try {
+      if (text.isNotEmpty) {
+        final FirebaseAuth _auth = FirebaseAuth.instance;
+        var currentUser = _auth.currentUser;
+        final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+        await _firestore
+            .collection('posts')
+            .doc(widget.url)
+            .collection('comments')
+            .doc()
+            .set({
+          'text': text,
+          'name': currentUser!.email,
+          'datePublished': DateTime.now(),
+        });
+
+        final DocumentReference documentRef =
+            FirebaseFirestore.instance.collection('posts').doc(widget.url);
+
+        documentRef.update({'comments': FieldValue.increment(1)}).then((_) {
+          print('Document updated successfully!');
+        }).catchError((error) {
+          print('Error updating document: $error');
+        });
+      } else {}
+      res = "success";
+    } catch (e) {
+      res = e.toString();
+    }
+  }
+
+  List filedata = [];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Comment Page"),
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.white12,
+        title: const Text('Comment'),
       ),
-      body: Container(
-        child: CommentBox(
-          userImage: CommentBox.commentImageParser(
-              imageURLorPath: "assets/img/userpic.jpg"),
-          child: commentChild(filedata),
-          labelText: 'Write a comment...',
-          errorText: 'Comment cannot be blank',
-          withBorder: false,
-          sendButtonMethod: () {
-            if (formKey.currentState!.validate()) {
-              print(commentController.text);
-              setState(() {
-                var value = {
-                  'name': 'New User',
-                  'pic':
-                      'https://lh3.googleusercontent.com/a-/AOh14GjRHcaendrf6gU5fPIVd8GIl1OgblrMMvGUoCBj4g=s400',
-                  'message': commentController.text,
-                  'date': '2021-01-01 12:00:00'
-                };
-                filedata.insert(0, value);
-              });
-              commentController.clear();
-              FocusScope.of(context).unfocus();
-            } else {
-              print("Not validated");
+      body: StreamBuilder(
+          stream: FirebaseFirestore.instance
+              .collection('posts')
+              .doc(widget.url)
+              .collection('comments')
+              .orderBy('datePublished', descending: true)
+              .snapshots(),
+          builder: (context, snapshot)
+              //Cheap Trick--> Mention Type of dynamic qqueue
+              {
+            var data = snapshot.data;
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
             }
-          },
-          formKey: formKey,
-          commentController: commentController,
-          backgroundColor: Colors.blue,
-          textColor: Colors.white,
-          sendWidget: Icon(Icons.send_sharp, size: 30, color: Colors.white),
+            return ListView.builder(
+                itemCount: snapshot.data!.docs.length,
+                itemBuilder: (_, index) {
+                  DocumentSnapshot _documentSnapshot =
+                      snapshot.data!.docs[index];
+                  var text = _documentSnapshot['text'];
+                  var name = _documentSnapshot['name'];
+                  var date = _documentSnapshot['datePublished'].toDate();
+                  String datetime = date.year.toString() +
+                      "/" +
+                      date.month.toString() +
+                      "/" +
+                      date.day.toString();
+                  print(datetime);
+
+                  return ListView(
+                    shrinkWrap: true,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(2.0, 8.0, 2.0, 0.0),
+                        child: ListTile(
+                          leading: GestureDetector(
+                            onTap: () async {
+                              // Display the image in large form.
+                              print("Comment Clicked");
+                            },
+                            child: Container(
+                              height: 50.0,
+                              width: 50.0,
+                              decoration: new BoxDecoration(
+                                  color: Colors.white12,
+                                  borderRadius: new BorderRadius.all(
+                                      Radius.circular(50))),
+                              child: CircleAvatar(
+                                radius: 50,
+                                backgroundImage: NetworkImage(
+                                    "https://media.istockphoto.com/id/1300845620/vector/user-icon-flat-isolated-on-white-background-user-symbol-vector-illustration.jpg?s=1024x1024&w=is&k=20&c=-mUWsTSENkugJ3qs5covpaj-bhYpxXY-v9RDpzsw504="),
+                              ),
+                            ),
+                          ),
+                          title: Text(
+                            name,
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black),
+                          ),
+                          subtitle: Text(text),
+                          trailing: Text(datetime,
+                              style:
+                                  TextStyle(fontSize: 10, color: Colors.black)),
+                        ),
+                      )
+                    ],
+                  );
+                });
+          }),
+      bottomNavigationBar: SafeArea(
+        child: Container(
+          color: Colors.grey,
+          height: 50,
+          margin:
+              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          padding: const EdgeInsets.only(left: 16, right: 8),
+          child: Row(
+            children: [
+              CircleAvatar(
+                backgroundImage: NetworkImage(
+                    "https://media.istockphoto.com/id/1300845620/vector/user-icon-flat-isolated-on-white-background-user-symbol-vector-illustration.jpg?s=1024x1024&w=is&k=20&c=-mUWsTSENkugJ3qs5covpaj-bhYpxXY-v9RDpzsw504="),
+              ),
+              SizedBox(width: 10),
+              Expanded(
+                child: TextField(
+                  controller: _commentController,
+                  decoration: InputDecoration(
+                    hintText: 'Comment',
+                    border: InputBorder.none,
+                    fillColor: Colors.white,
+                    filled: true,
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: Icon(Icons.send),
+                onPressed: () async {
+                  await postComment(_commentController.text);
+                  setState(() {
+                    _commentController.clear();
+                  });
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
