@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -12,19 +13,15 @@ import 'package:path/path.dart';
 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({Key? key}) : super(key: key);
-
   @override
   _CameraScreenState createState() => _CameraScreenState();
 }
 
 class _CameraScreenState extends State<CameraScreen> {
-/*
-
-  bool _loading = true;
-  late File? _image;
-  late List? _output;
+  /* bool _loading = true;
+  File? _image;
+  List? _output;
   final picker = ImagePicker();
-
   @override
   void initState() {
     super.initState();
@@ -36,13 +33,13 @@ class _CameraScreenState extends State<CameraScreen> {
   classifyImage(File image) async {
     var output = await Tflite.runModelOnImage(
       path: image.path,
-      numResults: 5,
-      threshold: 0.5,
-      imageMean: 127.5,
-      imageStd: 127.5,
+      imageMean: 0.0,
+      imageStd: 255.0,
+      numResults: 1,
+      threshold: 0.2,
     );
     setState(() {
-      _output = output!;
+      _output = output;
       _loading = false;
     });
   }
@@ -51,45 +48,41 @@ class _CameraScreenState extends State<CameraScreen> {
     await Tflite.loadModel(
       model: 'assets/model_unquant.tflite',
       labels: 'assets/labels.txt',
+      numThreads: 1,
     );
   }
 
   @override
   void dispose() {
-    super.dispose();
     Tflite.close();
+    super.dispose();
   }
+
+  
 
   pickImage() async {
     var image = await picker.pickImage(source: ImageSource.camera);
     if (image == null) return null;
-
     setState(() {
       _image = File(image.path);
     });
-
     classifyImage(_image!);
   }
 
   pickGalleryImage() async {
     var image = await picker.pickImage(source: ImageSource.gallery);
     if (image == null) return null;
-
     setState(() {
       _image = File(image.path);
     });
-
     classifyImage(_image!);
   }
 
-  */
+*/
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
-/*
-
       backgroundColor: Colors.white,
       body: Container(
         padding: EdgeInsets.symmetric(horizontal: 24),
@@ -101,12 +94,15 @@ class _CameraScreenState extends State<CameraScreen> {
               child: Text(
                 'Detect Butterfly',
                 style: TextStyle(
-                  color: Colors.purple,
+                  color: Color(0xFFE99600),
                   fontWeight: FontWeight.w500,
                   fontSize: 28,
                 ),
               ),
             ),
+
+            /*
+
             Container(
               child: Column(
                 children: <Widget>[
@@ -118,7 +114,7 @@ class _CameraScreenState extends State<CameraScreen> {
                   SizedBox(height: 20),
                   if (_output != null)
                     Text(
-                      'Butterfly: ${_output![0]['label']}',
+                      '${_output![0]['label']}',
                       style: TextStyle(color: Colors.white, fontSize: 20),
                     )
                   else
@@ -127,15 +123,16 @@ class _CameraScreenState extends State<CameraScreen> {
                 ],
               ),
             ),
+
+            */
             SizedBox(height: 20),
-
             //using SASS
-
             Center(
               child: Column(
                 children: <Widget>[
                   GestureDetector(
-                    onTap: pickImage,
+                    //  onTap: pickImage,
+
                     child: Container(
                       width: MediaQuery.of(context).size.width - 150,
                       alignment: Alignment.center,
@@ -153,7 +150,8 @@ class _CameraScreenState extends State<CameraScreen> {
                   ),
                   SizedBox(height: 10),
                   GestureDetector(
-                    onTap: pickGalleryImage,
+                    // onTap: pickGalleryImage,
+
                     child: Container(
                       width: MediaQuery.of(context).size.width - 150,
                       alignment: Alignment.center,
@@ -175,9 +173,6 @@ class _CameraScreenState extends State<CameraScreen> {
           ],
         ),
       ),
-
-     */
-
-        );
+    );
   }
 }

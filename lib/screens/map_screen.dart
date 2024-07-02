@@ -82,7 +82,7 @@ class _MapPageState extends State<MapPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Flutter Map Demo'),
+        title: Text(' Map '),
       ),
       body: Column(
         children: [
