@@ -71,6 +71,8 @@ dependencies:
   
   
   
+  
+  
 
 dev_dependencies:
   flutter_test:
@@ -99,6 +101,7 @@ flutter:
     - assets/logo1.jpeg
     - assets/labels.txt
     - assets/model_unquant.tflite 
+  
      
 
   # An image asset can refer to one or more resolution-specific "variants", see

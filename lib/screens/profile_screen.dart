@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/reusable_widgets/reusable_widget.dart';
-import 'package:flutter_application_1/screens/home_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -12,80 +13,45 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  String _userName = "";
-
-  @override
-  void initState() {
-    super.initState();
-    loadUserData();
-  }
-
-  void loadUserData() async {
-    try {
-      String uid = FirebaseAuth.instance.currentUser?.uid ?? "";
-      DocumentSnapshot userDoc =
-          await FirebaseFirestore.instance.collection('users').doc(uid).get();
-
-      setState(() {
-        _userName = userDoc['username'] ?? "";
-      });
-    } catch (error) {
-      print("Error loading user data: ${error.toString()}");
-    }
-  }
+  XFile? _imageFile;
+  final _globalkey = GlobalKey<FormState>();
+  TextEditingController _name = TextEditingController();
+  TextEditingController _profession = TextEditingController();
+  TextEditingController _dob = TextEditingController();
+  TextEditingController _title = TextEditingController();
+  TextEditingController _about = TextEditingController();
+  final ImagePicker _picker = ImagePicker();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Profile'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircleAvatar(
-              radius: 50,
-              backgroundImage: NetworkImage(
-                FirebaseAuth.instance.currentUser?.photoURL ??
-                    'https://example.com/default-profile-image.jpg',
-              ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+        child: ListView(
+          children: <Widget>[
+            imageProfile(),
+            SizedBox(
+              height: 20,
             ),
-            SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () {
-                _showSnackbar('Change Profile Photo');
-                // Add logic to handle uploading new profile photo from gallery
-                // You may want to use a package like image_picker for this
-              },
-              child: Text('Change Profile Photo'),
+            nameTextField(),
+            SizedBox(
+              height: 20,
             ),
-            SizedBox(height: 20),
-            FutureBuilder(
-              future: getUserInfo(FirebaseAuth.instance.currentUser?.uid ?? ""),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return CircularProgressIndicator();
-                } else if (snapshot.hasError) {
-                  return Text('Error fetching user data');
-                } else {
-                  final username = snapshot.data?['userName'] ?? 'Not found';
-                  return Text(
-                    'User Name: $username',
-                    style: TextStyle(fontSize: 20),
-                  );
-                }
-              },
+            professionTextField(),
+            SizedBox(
+              height: 20,
             ),
-            SizedBox(height: 10),
-            Text(
-              'Email: ${FirebaseAuth.instance.currentUser?.email ?? "N/A"}',
-              style: TextStyle(fontSize: 20),
+            dobField(),
+            SizedBox(
+              height: 20,
             ),
-            SizedBox(height: 10),
-            Text(
-              'Password: *********',
-              style: TextStyle(fontSize: 20),
+            titleTextField(),
+            SizedBox(
+              height: 20,
+            ),
+            aboutTextField(),
+            SizedBox(
+              height: 20,
             ),
           ],
         ),
@@ -93,25 +59,219 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  void _showSnackbar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        duration: Duration(seconds: 2),
+  Widget imageProfile() {
+    return Center(
+      child: Stack(children: <Widget>[
+        CircleAvatar(
+          radius: 80.0,
+          backgroundImage: _imageFile == null
+              ? AssetImage("assets/logo1.jpeg")
+              : FileImage(File(_imageFile!.path)) as ImageProvider,
+        ),
+        Positioned(
+          bottom: 20.0,
+          right: 20.0,
+          child: InkWell(
+            onTap: () {
+              showModalBottomSheet(
+                context: context,
+                builder: ((builder) => bottomSheet()),
+              );
+            },
+            child: Icon(
+              Icons.camera_alt,
+              color: Colors.teal,
+              size: 28.0,
+            ),
+          ),
+        ),
+      ]),
+    );
+  }
+
+  Widget bottomSheet() {
+    return Container(
+      height: 100.0,
+      width: MediaQuery.of(context).size.width,
+      margin: EdgeInsets.symmetric(
+        horizontal: 20,
+        vertical: 20,
+      ),
+      child: Column(
+        children: <Widget>[
+          Text(
+            "Choose Profile photo",
+            style: TextStyle(
+              fontSize: 20.0,
+            ),
+          ),
+          SizedBox(
+            height: 20,
+          ),
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+            TextButton.icon(
+              icon: Icon(Icons.camera),
+              onPressed: () {
+                takePhoto(ImageSource.camera);
+              },
+              label: Text("Camera"),
+            ),
+            TextButton.icon(
+              icon: Icon(Icons.image),
+              onPressed: () {
+                takePhoto(ImageSource.gallery);
+              },
+              label: Text("Gallery"),
+            ),
+          ])
+        ],
       ),
     );
   }
 
-  Future<Map<String, dynamic>?> getUserInfo(String userId) async {
-    try {
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userId)
-          .get();
-      return userDoc.data() as Map<String, dynamic>;
-    } catch (error) {
-      print("Error fetching user data: ${error.toString()}");
-      return null;
-    }
+  void takePhoto(ImageSource source) async {
+    final pickedFile = await _picker.pickImage(
+      source: source,
+    );
+    setState(() {
+      _imageFile = pickedFile;
+    });
+  }
+
+  Widget nameTextField() {
+    return TextFormField(
+      controller: _name,
+      validator: (value) {
+        if (value == null || value.isEmpty) return "Name can't be empty";
+        return null;
+      },
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+            borderSide: BorderSide(
+          color: Colors.teal,
+        )),
+        focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(
+          color: Colors.orange,
+          width: 2,
+        )),
+        prefixIcon: Icon(
+          Icons.person,
+          color: Colors.green,
+        ),
+        labelText: "Name",
+        helperText: "Name can't be empty",
+        hintText: "Dev Stack",
+      ),
+    );
+  }
+
+  Widget professionTextField() {
+    return TextFormField(
+      controller: _profession,
+      validator: (value) {
+        if (value == null || value.isEmpty) return "Profession can't be empty";
+        return null;
+      },
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+            borderSide: BorderSide(
+          color: Colors.teal,
+        )),
+        focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(
+          color: Colors.orange,
+          width: 2,
+        )),
+        prefixIcon: Icon(
+          Icons.person,
+          color: Colors.green,
+        ),
+        labelText: "Profession",
+        helperText: "Profession can't be empty",
+        hintText: "Full Stack Developer",
+      ),
+    );
+  }
+
+  Widget dobField() {
+    return TextFormField(
+      controller: _dob,
+      validator: (value) {
+        if (value == null || value.isEmpty) return "DOB can't be empty";
+        return null;
+      },
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+            borderSide: BorderSide(
+          color: Colors.teal,
+        )),
+        focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(
+          color: Colors.orange,
+          width: 2,
+        )),
+        prefixIcon: Icon(
+          Icons.person,
+          color: Colors.green,
+        ),
+        labelText: "Date Of Birth",
+        helperText: "Provide DOB on dd/mm/yyyy",
+        hintText: "01/01/2020",
+      ),
+    );
+  }
+
+  Widget titleTextField() {
+    return TextFormField(
+      controller: _title,
+      validator: (value) {
+        if (value == null || value.isEmpty) return "Title can't be empty";
+        return null;
+      },
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+            borderSide: BorderSide(
+          color: Colors.teal,
+        )),
+        focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(
+          color: Colors.orange,
+          width: 2,
+        )),
+        prefixIcon: Icon(
+          Icons.person,
+          color: Colors.green,
+        ),
+        labelText: "Title",
+        helperText: "It can't be empty",
+        hintText: "Flutter Developer",
+      ),
+    );
+  }
+
+  Widget aboutTextField() {
+    return TextFormField(
+      controller: _about,
+      validator: (value) {
+        if (value == null || value.isEmpty) return "About can't be empty";
+        return null;
+      },
+      maxLines: 4,
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+            borderSide: BorderSide(
+          color: Colors.teal,
+        )),
+        focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(
+          color: Colors.orange,
+          width: 2,
+        )),
+        labelText: "About",
+        helperText: "Write about yourself",
+        hintText: "I am Dev Stack",
+      ),
+    );
   }
 }

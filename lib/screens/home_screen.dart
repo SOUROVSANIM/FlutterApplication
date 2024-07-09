@@ -8,6 +8,7 @@ import 'package:flutter_application_1/screens/people_screen.dart';
 import 'package:flutter_application_1/screens/profile_screen.dart';
 import 'package:flutter_application_1/screens/signin_screen.dart';
 import 'package:flutter_application_1/screens/youtube_player_screen.dart.dart';
+import 'package:camera/camera.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);

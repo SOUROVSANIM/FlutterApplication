@@ -22,6 +22,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   DateTime _selectedDate = DateTime.now();
   String _selectedGender = '';
   late String _dropdownValue;
+  bool _isUsernameAvailable = true;
 
   @override
   void initState() {
@@ -42,62 +43,64 @@ class _SignUpScreenState extends State<SignUpScreen> {
         ),
       ),
       body: Container(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                hexStringToColor("C82893"),
-                hexStringToColor("9546C4"),
-                hexStringToColor("5E61F4"),
-              ],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              hexStringToColor("C82893"),
+              hexStringToColor("9546C4"),
+              hexStringToColor("5E61F4"),
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
-          child: SingleChildScrollView(
-              child: Padding(
+        ),
+        child: SingleChildScrollView(
+          child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 120, 20, 0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                const SizedBox(
-                  height: 20,
-                ),
+                const SizedBox(height: 20),
                 reusableTextField(
                   "Enter UserName",
                   Icons.person_outline,
                   false,
                   _userNameTextController,
                 ),
-                const SizedBox(
-                  height: 20,
-                ),
+                if (!_isUsernameAvailable)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Text(
+                      'Username is already taken!',
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ),
+                const SizedBox(height: 20),
                 reusableTextField(
                   "Enter Email Id",
                   Icons.person_outline,
                   false,
                   _emailTextController,
                 ),
-                const SizedBox(
-                  height: 20,
-                ),
+                const SizedBox(height: 20),
                 reusableTextField(
                   "Enter Password",
                   Icons.lock_outlined,
                   true,
                   _passwordTextController,
                 ),
-                const SizedBox(
-                  height: 20,
-                ),
+                const SizedBox(height: 20),
 
                 // Date picker
-
                 OutlinedButton(
                   onPressed: () async {
                     DateTime? selected = await showDatePicker(
-                        context: context, firstDate: endDate, lastDate: today);
+                      context: context,
+                      firstDate: endDate,
+                      lastDate: today,
+                    );
                     if (selected != null && selected != _selectedDate) {
                       setState(() {
                         _selectedDate = selected;
@@ -105,28 +108,27 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     }
                   },
                   style: OutlinedButton.styleFrom(
-                    backgroundColor: Colors.purple, // Button background color
-                    side: const BorderSide(color: Colors.white), // Border color
+                    backgroundColor: Colors.purple,
+                    side: const BorderSide(color: Colors.white),
                     shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(8.0), // Button border radius
+                      borderRadius: BorderRadius.circular(8.0),
                     ),
                   ),
-                  child: const Padding(
-                    padding: EdgeInsets.all(10.0),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Icon(
                           Icons.calendar_today,
-                          color: Colors.black, // Icon color
+                          color: Colors.black,
                         ),
                         SizedBox(width: 10),
                         Expanded(
                           child: Text(
                             'Select Birthday',
                             style: TextStyle(
-                              color: Colors.white, // Text color
+                              color: Colors.white,
                               fontSize: 16,
                             ),
                           ),
@@ -134,7 +136,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         SizedBox(width: 10),
                         Icon(
                           Icons.arrow_drop_down,
-                          color: Colors.black, // Arrow icon color
+                          color: Colors.black,
                         ),
                       ],
                     ),
@@ -142,8 +144,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
                 Text('Selected Birthday: ${_selectedDate.toString()}'),
 
-                //multiple drop box
-
+                // Gender dropdown
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.purple,
@@ -159,7 +160,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     iconSize: 24,
                     elevation: 16,
                     style: const TextStyle(
-                        color: Colors.deepPurple, fontSize: 16.0),
+                      color: Colors.deepPurple,
+                      fontSize: 16.0,
+                    ),
                     underline: Container(), // Remove underline
                     onChanged: (String? newValue) {
                       setState(() {
@@ -181,8 +184,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                 ),
 
-                //user name verification
-
                 const SizedBox(height: 20),
                 signInSignUpButton(context, false, () async {
                   try {
@@ -195,20 +196,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         .get();
 
                     if (userDoc.exists) {
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('Username already taken!')));
-                        return;
-                      }
+                      setState(() {
+                        _isUsernameAvailable = false;
+                      });
+                      return;
+                    } else {
+                      setState(() {
+                        _isUsernameAvailable = true;
+                      });
                     }
 
-                    //email verification
-
+                    // Create user with email and password
                     UserCredential userCredential = await FirebaseAuth.instance
                         .createUserWithEmailAndPassword(
-                            email: _emailTextController.text,
-                            password: _passwordTextController.text);
+                      email: _emailTextController.text.trim(),
+                      password: _passwordTextController.text,
+                    );
 
                     // Send email verification
                     await userCredential.user!.sendEmailVerification();
@@ -227,25 +230,32 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                     print("Created New Account");
                     Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const HomeScreen()));
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const HomeScreen()),
+                    );
 
                     // Inform the user that a verification email has been sent
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text("Verification email sent"),
-                    ));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Verification email sent"),
+                      ),
+                    );
                   } catch (error) {
                     print("Error ${error.toString()}");
                     // Handle registration or verification errors
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text("Error: ${error.toString()}"),
-                    ));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("Error: ${error.toString()}"),
+                      ),
+                    );
                   }
-                })
+                }),
               ],
             ),
-          ))),
+          ),
+        ),
+      ),
     );
   }
 }
