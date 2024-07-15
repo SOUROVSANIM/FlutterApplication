@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/reusable_widgets/reusable_widget.dart';
+import 'package:flutter_application_1/reusable_widgets/reusable_widget.dart'
+    as reusable_widget;
 import 'package:flutter_application_1/screens/home_screen.dart';
 import 'package:flutter_application_1/screens/signup_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -48,23 +49,31 @@ class _SignInScreenState extends State<SignInScreen> {
 
                 //give user name,email and password
 
-                reusableTextField("Enter Email", Icons.person_outline, false,
-                    _emailTextController),
+                reusable_widget.reusableTextField(
+                  "Enter Email",
+                  Icons.person_outline,
+                  false,
+                  _emailTextController,
+                ),
                 const SizedBox(
                   height: 20,
                 ),
-                reusableTextField("Enter Password", Icons.lock_outline, true,
-                    _passwordTextController),
+                reusable_widget.reusableTextField(
+                  "Enter Password",
+                  Icons.lock_outline,
+                  true,
+                  _passwordTextController,
+                ),
                 const SizedBox(
                   height: 20,
                 ),
-                signInSignUpButton(context, true, () {
+                reusable_widget.signInSignUpButton(context, true, () {
                   FirebaseAuth.instance
                       .signInWithEmailAndPassword(
                           email: _emailTextController.text,
                           password: _passwordTextController.text)
                       .then((value) {
-                    print("Created New Account");
+                    print("User signed in");
                     Navigator.push(
                         context,
                         MaterialPageRoute(

@@ -30,6 +30,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _dropdownValue = 'Select your gender';
   }
 
+  void checkUsernameAvailability(String username) async {
+    final userDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(username)
+        .get();
+    setState(() {
+      _isUsernameAvailable = !userDoc.exists;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -68,6 +78,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   Icons.person_outline,
                   false,
                   _userNameTextController,
+                  checkUsernameAvailability,
                 ),
                 if (!_isUsernameAvailable)
                   Padding(
@@ -83,6 +94,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   Icons.person_outline,
                   false,
                   _emailTextController,
+                  (value) {},
                 ),
                 const SizedBox(height: 20),
                 reusableTextField(
@@ -90,6 +102,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   Icons.lock_outlined,
                   true,
                   _passwordTextController,
+                  (value) {},
                 ),
                 const SizedBox(height: 20),
 
@@ -258,4 +271,72 @@ class _SignUpScreenState extends State<SignUpScreen> {
       ),
     );
   }
+}
+
+Widget reusableTextField(String hintText, IconData icon, bool isPasswordType,
+    TextEditingController controller, Function(String) onChanged) {
+  return Container(
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(30.0),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.1),
+          spreadRadius: 4,
+          blurRadius: 4,
+          offset: Offset(0, 3), // changes position of shadow
+        ),
+      ],
+    ),
+    child: TextField(
+      controller: controller,
+      obscureText: isPasswordType,
+      onChanged: onChanged,
+      decoration: InputDecoration(
+        prefixIcon: Icon(icon, color: Colors.black),
+        hintText: hintText,
+        border: InputBorder.none,
+        contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+      ),
+    ),
+  );
+}
+
+Widget signInSignUpButton(BuildContext context, bool isLogin, Function onTap) {
+  return GestureDetector(
+    onTap: () {
+      onTap();
+    },
+    child: Container(
+      width: MediaQuery.of(context).size.width,
+      height: 50,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(30),
+        gradient: LinearGradient(
+          colors: [
+            hexStringToColor("C82893"),
+            hexStringToColor("9546C4"),
+            hexStringToColor("5E61F4"),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Center(
+        child: Text(
+          isLogin ? "Log In" : "Sign Up",
+          style: const TextStyle(
+              color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+      ),
+    ),
+  );
+}
+
+Color hexStringToColor(String hexColor) {
+  hexColor = hexColor.toUpperCase().replaceAll("#", "");
+  if (hexColor.length == 6) {
+    hexColor = "FF" + hexColor;
+  }
+  return Color(int.parse(hexColor, radix: 16));
 }

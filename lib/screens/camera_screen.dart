@@ -80,69 +80,98 @@ class _CameraScreenState extends State<CameraScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
-        /*
-      appBar: AppBar(
-        centerTitle: true,
-        title: Text(
-          "Tensorflow Lite",
-          style: TextStyle(color: Colors.white, fontSize: 25),
-        ),
-        backgroundColor: Colors.amber,
-        elevation: 0,
-      ),
+      backgroundColor: Colors.white,
       body: Container(
-        color: Colors.white,
+        padding: EdgeInsets.symmetric(horizontal: 24),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            _loading
-                ? Container(
-                    height: 300,
-                    width: 300,
-                  )
-                : Container(
-                    margin: EdgeInsets.all(20),
-                    width: MediaQuery.of(context).size.width,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        _image == null ? Container() : Image.file(_image!),
-                        SizedBox(
-                          height: 20,
-                        ),
-                        _image == null
-                            ? Container()
-                            : _outputs != null
-                                ? Text(
-                                    _outputs![0]["label"],
-                                    style: TextStyle(
-                                        color: Colors.black, fontSize: 20),
-                                  )
-                                : Container(child: Text(""))
-                      ],
+            Center(
+              child: Text(
+                'Detect Butterfly',
+                style: TextStyle(
+                  //color: Colors.purple,
+                  color: Color(0xFFE99600),
+                  fontWeight: FontWeight.w500,
+                  fontSize: 28,
+                ),
+              ),
+            ),
+
+            /*
+            Container(
+              child: Column(
+                children: <Widget>[
+                  if (_image != null)
+                    Container(
+                      height: 250,
+                      child: Image.file(_image!),
+                    ),
+                  SizedBox(height: 20),
+                  if (_output != null)
+                    Text(
+                        _outputs![0]["label"],
+                        style: TextStyle(
+                        color: Colors.black, fontSize: 20),
+
+                    )
+                  else
+                    Container(),
+                  SizedBox(height: 10),
+                ],
+              ),
+            ),
+            SizedBox(height: 20),
+            */
+            SizedBox(height: 20),
+            //using SASS
+            Center(
+              child: Column(
+                children: <Widget>[
+                  GestureDetector(
+                    //onTap: pickImage,
+
+                    child: Container(
+                      width: MediaQuery.of(context).size.width - 150,
+                      alignment: Alignment.center,
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 24, vertical: 17),
+                      decoration: BoxDecoration(
+                        color: Color(0xFFE99600),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        'With Camera',
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
                   ),
-            SizedBox(
-              height: MediaQuery.of(context).size.height * 0.01,
-            ),
-            FloatingActionButton(
-              tooltip: 'Pick Image',
-              onPressed: pickImage,
-              child: Icon(
-                Icons.add_a_photo,
-                size: 20,
-                color: Colors.white,
+                  SizedBox(height: 10),
+                  GestureDetector(
+                    //onTap: pickGalleryImage,
+
+                    child: Container(
+                      width: MediaQuery.of(context).size.width - 150,
+                      alignment: Alignment.center,
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 24, vertical: 17),
+                      decoration: BoxDecoration(
+                        color: Color(0xFFE99600),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        'With Photo',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              backgroundColor: Colors.amber,
             ),
           ],
         ),
-
       ),
-
-      */
-        );
+    );
   }
 }
