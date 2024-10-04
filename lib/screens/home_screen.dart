@@ -136,11 +136,14 @@ class _HomeScreenState extends State<HomeScreen>
           children: [
             IconButton(
               icon: Icon(Icons.camera),
-              onPressed: () {
-                _showSnackbar('Camera');
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => CameraScreen()),
+              onPressed: () async {
+                print("Hello)=");
+
+                await availableCameras().then(
+                  (value) => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => DetectionScreen(cameras: value))),
                 );
               },
             ),

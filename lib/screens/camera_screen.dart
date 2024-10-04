@@ -1,177 +1,253 @@
-import 'dart:io';
+//*********************************************************************************************************************************
+//Learn about camera from : https://medium.com/@fernnandoptr/how-to-use-camera-in-flutter-flutter-camera-package-44defe81d2da     *
+//                                                                                                                                *
+//*********************************************************************************************************************************
 import 'package:camera/camera.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-//import 'package:tflite/tflite.dart';
-import 'package:path/path.dart';
+import 'package:tflite/tflite.dart';
 
-class CameraScreen extends StatefulWidget {
-  const CameraScreen({Key? key}) : super(key: key);
+class DetectionScreen extends StatefulWidget {
+  final List<CameraDescription> cameras;
+  //* HomeScreen theke ashci
+  const DetectionScreen({super.key, required this.cameras});
 
   @override
-  _CameraScreenState createState() => _CameraScreenState();
+  State<DetectionScreen> createState() => _DetectionScreenState();
 }
 
-class _CameraScreenState extends State<CameraScreen> {
-  /*List<dynamic>? _outputs;
-  File? _image;
-  bool _loading = false;
+class _DetectionScreenState extends State<DetectionScreen> {
+  CameraImage? cameraImage;
+  late CameraController cameraController;
+  late int _isFrontCamera = 0;
+  bool _isDataLoading = true;
+  late List<dynamic> output;
 
   @override
-  void initState() {
+  initState() {
+    loadCamera();
+    loadModel();
     super.initState();
-    _loading = true;
-
-    loadModel().then((value) {
-      setState(() {
-        _loading = false;
-      });
-    });
-  }
-
-  Future<void> loadModel() async {
-    await Tflite.loadModel(
-      model: "assets/model_unquant.tflite",
-      labels: "assets/labels.txt",
-      numThreads: 1,
-    );
-  }
-
-  Future<void> classifyImage(File image) async {
-    var output = await Tflite.runModelOnImage(
-      path: image.path,
-      imageMean: 0.0,
-      imageStd: 255.0,
-      numResults: 2,
-      threshold: 0.2,
-      asynch: true,
-    );
-    setState(() {
-      _loading = false;
-      _outputs = output;
-    });
   }
 
   @override
-  void dispose() {
-    Tflite.close();
+  dispose() {
+    cameraController.dispose();
     super.dispose();
   }
 
-  Future<void> pickImage() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? pickedFile =
-        await picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile == null) return;
-
-    setState(() {
-      _loading = true;
-      _image = File(pickedFile.path);
-    });
-
-    classifyImage(_image!);
+  loadCamera() async {
+    cameraController =
+        CameraController(widget.cameras[_isFrontCamera], ResolutionPreset.max);
+    try {
+      await cameraController.initialize().then(
+        (value) {
+          if (!mounted) {
+            return;
+          } else {
+            setState(
+              () {
+                cameraController.startImageStream(
+                  (imageStream) {
+                    cameraImage = imageStream;
+                    runModel();
+                  },
+                );
+              },
+            );
+          }
+        },
+      );
+    } catch (e) {
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Loading Camera: ${e.toString()}"),
+        ),
+      );
+    }
   }
 
-  */
+  runModel() async {
+    if (cameraImage != null) {
+      var predictions = await Tflite.runModelOnFrame(
+        bytesList: cameraImage!.planes.map((plane) {
+          return plane.bytes;
+        }).toList(),
+        imageHeight: cameraImage!.height,
+        imageWidth: cameraImage!.width,
+        imageMean: 127.5,
+        imageStd: 127.5,
+        rotation: 90,
+        numResults: 3,
+        threshold: 0.0,
+        asynch: true,
+      );
+      print(
+          "******************************************************************************************************${predictions![0].toString()}\n${predictions[1].toString()}\n${predictions[2].toString()}\n}");
+      print(
+          "******************************************************************************************************${predictions[0]["confidence"].toString()} ${predictions[0]["label"]}\n${predictions[1]["7confidence"].toString()} ${predictions[1]["label"].toString()}\n${predictions[2]["confidence"].toString()} ${predictions[2]["label"].toString()}\n");
+
+      predictions!.sort((a, b) => a['index'].compareTo(b['index']));
+      // print(
+      //     "******************************************************************************************************${predictions![0].toString()}\n${predictions[1].toString()}\n${predictions[2].toString()}\n${predictions![3].toString()}\n${predictions[4].toString()}");
+
+      setState(
+        () {
+          output = predictions;
+          _isDataLoading = false;
+          // output = element['label'].split(RegExp(r"[0-9]")).last.toString();
+        },
+      );
+    }
+  }
+
+  loadModel() async {
+    await Tflite.loadModel(
+      model: "assets/model_unquant.tflite",
+      labels: "assets/labels.txt",
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: Container(
-        padding: EdgeInsets.symmetric(horizontal: 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Center(
-              child: Text(
-                'Detect Butterfly',
-                style: TextStyle(
-                  //color: Colors.purple,
-                  color: Color(0xFFE99600),
-                  fontWeight: FontWeight.w500,
-                  fontSize: 28,
-                ),
-              ),
-            ),
-
-            /*
-            Container(
-              child: Column(
-                children: <Widget>[
-                  if (_image != null)
-                    Container(
-                      height: 250,
-                      child: Image.file(_image!),
-                    ),
-                  SizedBox(height: 20),
-                  if (_output != null)
-                    Text(
-                        _outputs![0]["label"],
-                        style: TextStyle(
-                        color: Colors.black, fontSize: 20),
-
-                    )
-                  else
-                    Container(),
-                  SizedBox(height: 10),
-                ],
-              ),
-            ),
-            SizedBox(height: 20),
-            */
-            SizedBox(height: 20),
-            //using SASS
-            Center(
-              child: Column(
-                children: <Widget>[
-                  GestureDetector(
-                    //onTap: pickImage,
-
-                    child: Container(
-                      width: MediaQuery.of(context).size.width - 150,
-                      alignment: Alignment.center,
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 24, vertical: 17),
-                      decoration: BoxDecoration(
-                        color: Color(0xFFE99600),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        'With Camera',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  GestureDetector(
-                    //onTap: pickGalleryImage,
-
-                    child: Container(
-                      width: MediaQuery.of(context).size.width - 150,
-                      alignment: Alignment.center,
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 24, vertical: 17),
-                      decoration: BoxDecoration(
-                        color: Color(0xFFE99600),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        'With Photo',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+      appBar: AppBar(
+        title: const Text("Detect Butterfly"),
+        centerTitle: true,
       ),
+      body: MediaQuery.of(context).orientation == Orientation.portrait
+          ? Column(
+              children: [
+                Stack(
+                  alignment: Alignment.bottomRight,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.55,
+                        width: MediaQuery.of(context).size.width,
+                        child: !cameraController.value.isInitialized
+                            ? Container()
+                            : AspectRatio(
+                                aspectRatio: cameraController.value.aspectRatio,
+                                child: CameraPreview(cameraController),
+                              ),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        setState(
+                          () {
+                            _isFrontCamera = 1 - _isFrontCamera;
+                            loadCamera();
+                          },
+                        );
+                      },
+                      icon: Icon(
+                        Icons.cameraswitch_rounded,
+                        color: const Color.fromARGB(255, 12, 173, 226),
+                        size: MediaQuery.of(context).size.height * 0.06,
+                      ),
+                    )
+                  ],
+                ),
+                _isDataLoading
+                    ? const CircularProgressIndicator()
+                    : Expanded(
+                        child: ListView.separated(
+                          primary: true,
+                          itemCount: 3,
+                          separatorBuilder: (BuildContext context, int index) =>
+                              const Divider(),
+                          itemBuilder: (context, index) {
+                            return ListView(
+                              shrinkWrap: true,
+                              children: [
+                                Text(
+                                  " ${output[index]["label"].split(RegExp(r"[0-9]")).last} ${double.parse(output[index]["confidence"].toStringAsFixed(5))}",
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                LinearProgressIndicator(
+                                  value: double.parse(output[index]
+                                          ["confidence"]
+                                      .toStringAsFixed(5)),
+                                )
+                              ],
+                            );
+                          },
+                        ),
+                      )
+              ],
+            )
+          : Row(
+              children: [
+                Stack(
+                  alignment: Alignment.topRight,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: SizedBox(
+                        height: MediaQuery.of(context).size.height,
+                        width: MediaQuery.of(context).size.width * 0.6,
+                        child: !cameraController.value.isInitialized
+                            ? Container()
+                            : AspectRatio(
+                                aspectRatio: cameraController.value.aspectRatio,
+                                child: CameraPreview(cameraController),
+                              ),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        setState(
+                          () {
+                            _isFrontCamera = 1 - _isFrontCamera;
+                            loadCamera();
+                          },
+                        );
+                      },
+                      icon: Icon(
+                        Icons.cameraswitch_rounded,
+                        color: const Color.fromARGB(255, 12, 173, 226),
+                        size: MediaQuery.of(context).size.height * 0.1,
+                      ),
+                    )
+                  ],
+                ),
+                _isDataLoading
+                    ? const CircularProgressIndicator()
+                    : Expanded(
+                        child: ListView.separated(
+                          primary: true,
+                          itemCount: 3,
+                          separatorBuilder: (BuildContext context, int index) =>
+                              const Divider(),
+                          itemBuilder: (context, index) {
+                            return ListView(
+                              shrinkWrap: true,
+                              children: [
+                                Text(
+                                  " ${output[index]["label"].split(RegExp(r"[0-9]")).last} ${double.parse(output[index]["confidence"].toStringAsFixed(5))}",
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                LinearProgressIndicator(
+                                  value: double.parse(output[index]
+                                          ["confidence"]
+                                      .toStringAsFixed(5)),
+                                )
+                              ],
+                            );
+                          },
+                        ),
+                      )
+              ],
+            ),
     );
   }
 }

@@ -66,6 +66,7 @@ dependencies:
   shared_preferences: ^2.2.2
   fluttertoast: ^8.2.4
   uuid: ^4.3.3
+  tflite: ^1.1.2
   
 
   

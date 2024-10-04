@@ -41,11 +41,11 @@ android {
         main.java.srcDirs += 'src/main/kotlin'
     }
 
-    /* aaptOptions {
+     aaptOptions {
         noCompress 'tflite'
         noCompress 'lite'
     }
-    */
+    
      
 
     defaultConfig {
@@ -76,7 +76,7 @@ flutter {
 }
 
 dependencies {
-    //implementation 'org.tensorflow:tensorflow-lite:+'
-    //implementation 'org.tensorflow:tensorflow-lite-gpu:+'
+    implementation 'org.tensorflow:tensorflow-lite:+'
+    implementation 'org.tensorflow:tensorflow-lite-gpu:+'
 
 }

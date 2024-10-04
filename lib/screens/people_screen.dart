@@ -22,7 +22,8 @@ class _PeopleScreenState extends State<PeopleScreen> {
   bool _hasNextPage = true;
   bool _isLoadMoreRunning = false;
   List<QueryDocumentSnapshot<Map<String, dynamic>>> _posts = [];
-  int _page = 0;
+  int _pageIndex = 0;
+  int _index = 0;
 
   @override
   void initState() {
@@ -122,16 +123,22 @@ class _PeopleScreenState extends State<PeopleScreen> {
               children: [
                 Expanded(
                   child: ListView.builder(
-                    itemCount: _posts.length,
+                    itemCount: 6, //_posts.length,
                     shrinkWrap: true,
-                    scrollDirection: Axis.vertical,
-                    controller: _scrollController,
-                    itemBuilder: (context, index) {
+                    itemBuilder: (context, int i) {
+                      _index = 6 * _pageIndex + i;
+                      if (_pageIndex * 6 + i >= _posts.length) {
+                        if (_pageIndex * 6 + i == _posts.length) {
+                          return const Text(
+                              'You have fetched all of the content');
+                        }
+                        return const Text("");
+                      }
                       return FutureBuilder(
-                        future: getUserInfo(_posts[index]),
+                        future: getUserInfo(_posts[_pageIndex + i]),
                         builder: ((context, snapshot) {
                           if (snapshot.hasData || snapshot.data == null) {
-                            String postId = _posts[index].id;
+                            String postId = _posts[_pageIndex + i].id;
 
                             return Card(
                               child: Column(
@@ -139,13 +146,15 @@ class _PeopleScreenState extends State<PeopleScreen> {
                                   Text(
                                       'Username: ${snapshot.data == null ? 'Not found' : snapshot.data!.id}'),
                                   const Text('Post:'),
-                                  Text(_posts[index].data()?['postText'] ?? ''),
+                                  Text(_posts[_pageIndex + i]
+                                          .data()?['postText'] ??
+                                      ''),
                                   Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceAround,
                                     children: [
                                       IconButton(
-                                        icon: Icon(Icons.thumb_up),
+                                        icon: const Icon(Icons.thumb_up),
                                         onPressed: _loadingLike
                                             ? null
                                             : () async {
@@ -157,8 +166,9 @@ class _PeopleScreenState extends State<PeopleScreen> {
                                                     .instance
                                                     .collection('likes')
                                                     .where('post_id',
-                                                        isEqualTo:
-                                                            _posts[index].id)
+                                                        isEqualTo: _posts[
+                                                                _pageIndex + i]
+                                                            .id)
                                                     .where('reactor_id',
                                                         isEqualTo: FirebaseAuth
                                                             .instance
@@ -185,7 +195,9 @@ class _PeopleScreenState extends State<PeopleScreen> {
                                                       .instance
                                                       .collection('likes')
                                                       .add({
-                                                    'post_id': _posts[index].id,
+                                                    'post_id':
+                                                        _posts[_pageIndex + i]
+                                                            .id,
                                                     'reactor_id': FirebaseAuth
                                                         .instance
                                                         .currentUser!
@@ -202,7 +214,8 @@ class _PeopleScreenState extends State<PeopleScreen> {
                                           stream: FirebaseFirestore.instance
                                               .collection('likes')
                                               .where('post_id',
-                                                  isEqualTo: _posts[index].id)
+                                                  isEqualTo:
+                                                      _posts[_pageIndex + i].id)
                                               .snapshots(),
                                           builder: ((context, snapshot) {
                                             if (snapshot.hasData) {
@@ -211,17 +224,18 @@ class _PeopleScreenState extends State<PeopleScreen> {
                                             }
 
                                             if (snapshot.hasError) {
-                                              return Text(
+                                              return const Text(
                                                   'Error loading likes');
                                             }
 
-                                            return Text('Loading likes...');
+                                            return const Text(
+                                                'Loading likes...');
                                           })),
 
                                       //comment part(url from comment screen)
 
                                       IconButton(
-                                        icon: Icon(Icons.comment),
+                                        icon: const Icon(Icons.comment),
                                         onPressed: () {
                                           Navigator.push(
                                             context,
@@ -268,6 +282,42 @@ class _PeopleScreenState extends State<PeopleScreen> {
                   ),
               ],
             ),
+      bottomNavigationBar: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                if (_pageIndex > 0) {
+                  _pageIndex -= 1;
+                }
+              });
+            },
+            child: const Row(
+              children: [
+                Icon(Icons.arrow_back_ios_rounded),
+                Text("Back"),
+              ],
+            ),
+          ),
+          Text("Page $_pageIndex/${_posts.length ~/ 6}"),
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                if (_pageIndex < _posts.length ~/ 6) {
+                  _pageIndex += 1;
+                }
+              });
+            },
+            child: const Row(
+              children: [
+                Text("Next"),
+                Icon(Icons.arrow_forward_ios_rounded),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
