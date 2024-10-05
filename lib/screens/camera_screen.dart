@@ -78,18 +78,18 @@ class _DetectionScreenState extends State<DetectionScreen> {
         imageMean: 127.5,
         imageStd: 127.5,
         rotation: 90,
-        numResults: 3,
+        numResults: 5,
         threshold: 0.0,
         asynch: true,
       );
-      print(
-          "******************************************************************************************************${predictions![0].toString()}\n${predictions[1].toString()}\n${predictions[2].toString()}\n}");
-      print(
-          "******************************************************************************************************${predictions[0]["confidence"].toString()} ${predictions[0]["label"]}\n${predictions[1]["7confidence"].toString()} ${predictions[1]["label"].toString()}\n${predictions[2]["confidence"].toString()} ${predictions[2]["label"].toString()}\n");
+      // print(
+      //     "${predictions![0].toString()}\n${predictions[1].toString()}\n${predictions[2].toString()}\n${predictions![3].toString()}\n${predictions[4].toString()}");
+      // print(
+      //     "${predictions[0]["confidence"].toString()} ${predictions[0]["label"]}\n${predictions[1]["confidence"].toString()} ${predictions[1]["label"].toString()}\n${predictions[2]["confidence"].toString()} ${predictions[2]["label"].toString()}\n${predictions[3]["confidence"].toString()} ${predictions[3]["label"].toString()}\n${predictions[4]["confidence"].toString()} ${predictions[4]["label"].toString()}");
 
       predictions!.sort((a, b) => a['index'].compareTo(b['index']));
       // print(
-      //     "******************************************************************************************************${predictions![0].toString()}\n${predictions[1].toString()}\n${predictions[2].toString()}\n${predictions![3].toString()}\n${predictions[4].toString()}");
+      //     "${predictions![0].toString()}\n${predictions[1].toString()}\n${predictions[2].toString()}\n${predictions![3].toString()}\n${predictions[4].toString()}");
 
       setState(
         () {
@@ -112,7 +112,7 @@ class _DetectionScreenState extends State<DetectionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Detect Butterfly"),
+        title: const Text("Detect Fish"),
         centerTitle: true,
       ),
       body: MediaQuery.of(context).orientation == Orientation.portrait
@@ -156,7 +156,7 @@ class _DetectionScreenState extends State<DetectionScreen> {
                     : Expanded(
                         child: ListView.separated(
                           primary: true,
-                          itemCount: 3,
+                          itemCount: 5,
                           separatorBuilder: (BuildContext context, int index) =>
                               const Divider(),
                           itemBuilder: (context, index) {
@@ -222,7 +222,7 @@ class _DetectionScreenState extends State<DetectionScreen> {
                     : Expanded(
                         child: ListView.separated(
                           primary: true,
-                          itemCount: 3,
+                          itemCount: 5,
                           separatorBuilder: (BuildContext context, int index) =>
                               const Divider(),
                           itemBuilder: (context, index) {
