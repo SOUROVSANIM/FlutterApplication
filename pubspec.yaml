@@ -67,6 +67,7 @@ dependencies:
   fluttertoast: ^8.2.4
   uuid: ^4.3.3
   tflite: ^1.1.2
+  tflite_flutter: ^0.11.0
   
 
   

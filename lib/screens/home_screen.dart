@@ -141,9 +141,13 @@ class _HomeScreenState extends State<HomeScreen>
 
                 await availableCameras().then(
                   (value) => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => DetectionScreen(cameras: value))),
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => DetectionScreen(
+                          //cameras: value,
+                          ),
+                    ),
+                  ),
                 );
               },
             ),

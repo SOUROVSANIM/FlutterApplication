@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
@@ -60,13 +60,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget imageProfile() {
+    final userData = FirebaseFirestore.instance
+        .collection('users')
+        .where('uid', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
+        .limit(1)
+        .get();
     return Center(
       child: Stack(children: <Widget>[
-        CircleAvatar(
-          radius: 80.0,
-          backgroundImage: _imageFile == null
-              ? AssetImage("assets/logo1.jpeg")
-              : FileImage(File(_imageFile!.path)) as ImageProvider,
+        FutureBuilder(
+          future: userData,
+          builder: (context, snapshot) {
+            final data = snapshot.data?.docs.first.data();
+
+            if (data == null || data.containsKey('image_url') == false) {
+              CircleAvatar(
+                radius: 80.0,
+                backgroundImage: _imageFile == null
+                    ? AssetImage("assets/logo1.jpeg")
+                    : FileImage(File(_imageFile!.path)) as ImageProvider,
+              );
+            }
+
+            return CircleAvatar(
+              radius: 80.0,
+              backgroundImage: _imageFile == null
+                  ? NetworkImage(data!['image_url'])
+                  : FileImage(File(_imageFile!.path)) as ImageProvider,
+            );
+          },
         ),
         Positioned(
           bottom: 20.0,
@@ -136,6 +157,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() {
       _imageFile = pickedFile;
     });
+
+    // Upload image here
+    if (mounted && _imageFile != null) {
+      final storage = FirebaseStorage.instance;
+      final fileRef = storage.ref().child(
+          '/image/${_imageFile?.name ?? ''}${DateTime.now().millisecondsSinceEpoch}');
+      final bytes = await _imageFile?.readAsBytes();
+      if (bytes != null) {
+        await fileRef.putData(bytes);
+
+        final imgLink = await fileRef.getDownloadURL();
+        final firestore = FirebaseFirestore.instance;
+        final users = await firestore
+            .collection('users')
+            .where('uid', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
+            .limit(1)
+            .get();
+        if (users.docs.isNotEmpty) {
+          final user = users.docs.first;
+          final userData = user.data();
+          await firestore
+              .collection('users')
+              .doc(user.id)
+              .set({...userData, 'image_url': imgLink});
+        }
+      }
+    }
   }
 
   Widget nameTextField() {
