@@ -60,10 +60,10 @@ class _AboutAppScreenState extends State<AboutAppScreen> {
               },
             ),
             IconButton(
-              icon: Icon(Icons.add), // Add icon for some action
+              icon: Icon(Icons.picture_as_pdf), // Add icon for some action
               onPressed: () {
                 _showSnackbar(
-                    'GraphQL'); // Show snackbar when button is pressed
+                    'Crystal Report'); // Show snackbar when button is pressed
                 Navigator.push(
                   // Navigate to RatingScreen
                   context,
